@@ -18,6 +18,7 @@
 
 use ink::prelude::vec::Vec;
 use ink::prelude::vec;
+use ink::storage::Mapping;
 
 /// Precision for fixed-point arithmetic (4 decimal places)
 const PRECISION: u64 = 10000;
@@ -59,6 +60,10 @@ mod horse_race {
         RaceNotInProgress,
         /// Race not finished
         RaceNotFinished,
+        /// Insufficient balance to place bet or withdraw
+        InsufficientBalance,
+        /// Invalid fee percentage (total exceeds 100%)
+        InvalidFeePercentage,
     }
 
     /// Result type for contract operations
@@ -80,14 +85,13 @@ mod horse_race {
         pub base_speed: u64,           // Bs[i] = 14 + strength
     }
 
-    /// Horse state during race simulation
     /// Exacta bet structure (predicting 1st and 2nd in exact order)
     #[derive(Debug, Clone, PartialEq, Eq)]
     #[ink::scale_derive(Encode, Decode, TypeInfo)]
     #[cfg_attr(feature = "std", derive(ink::storage::traits::StorageLayout))]
     pub struct ExactaBet {
         pub bettor: AccountId,
-        pub amount: Balance,
+        pub amount: u128,              // Bet amount in asset units
         pub first_pick: u8,            // Predicted 1st place horse ID
         pub second_pick: u8,           // Predicted 2nd place horse ID
         pub timestamp: u64,
@@ -102,7 +106,7 @@ mod horse_race {
         pub rankings: Vec<u8>,         // Horse IDs in finish order [1st, 2nd, 3rd, ...]
         pub finish_times: Vec<u64>,    // Finish times for each position
         pub winning_exacta: (u8, u8),  // (1st, 2nd)
-        pub total_pot: Balance,
+        pub total_pot: u128,           // Total pot in asset units
         pub seed_used: u64,
     }
 
@@ -112,9 +116,9 @@ mod horse_race {
     #[cfg_attr(feature = "std", derive(ink::storage::traits::StorageLayout))]
     pub struct Payout {
         pub bettor: AccountId,
-        pub bet_amount: Balance,
+        pub bet_amount: u128,          // Original bet in asset units
         pub multiplier: u64,
-        pub payout_amount: Balance,
+        pub payout_amount: u128,       // Payout in asset units
         pub exacta: (u8, u8),
     }
 
@@ -168,15 +172,37 @@ mod horse_race {
         bettor: AccountId,
         first_pick: u8,
         second_pick: u8,
-        amount: Balance,
+        amount: u128,
     }
 
     #[ink(event)]
     pub struct PayoutDistributed {
         #[ink(topic)]
         bettor: AccountId,
-        amount: Balance,
+        amount: u128,
         multiplier: u64,
+    }
+
+    #[ink(event)]
+    pub struct Deposited {
+        #[ink(topic)]
+        account: AccountId,
+        amount: u128,
+    }
+
+    #[ink(event)]
+    pub struct Withdrawn {
+        #[ink(topic)]
+        account: AccountId,
+        amount: u128,
+    }
+
+    #[ink(event)]
+    pub struct BetDistributed {
+        bet_amount: u128,
+        dev_share: u128,
+        operator_share: u128,
+        pot_share: u128,
     }
 
     // ============================================================================
@@ -219,11 +245,32 @@ mod horse_race {
         betting_start_time: u64,
         
         /// Total pot for current race
-        total_pot: Balance,
+        total_pot: u128,
         
         /// Exacta reward multipliers (stored as flat array for gas efficiency)
         /// Format: multipliers[first * 6 + second] = multiplier
         reward_multipliers: Vec<u64>,
+        
+        /// User balances (asset balances, not native tokens)
+        balances: Mapping<AccountId, u128>,
+        
+        /// Developer address for fee distribution
+        dev_address: AccountId,
+        
+        /// Operator address for fee distribution
+        operator_address: AccountId,
+        
+        /// Developer fee percentage (basis points, e.g., 500 = 5%)
+        dev_fee_bps: u16,
+        
+        /// Operator fee percentage (basis points, e.g., 500 = 5%)
+        operator_fee_bps: u16,
+        
+        /// Accumulated developer fees
+        dev_balance: u128,
+        
+        /// Accumulated operator fees
+        operator_balance: u128,
     }
 
     // ============================================================================
@@ -232,6 +279,7 @@ mod horse_race {
 
     impl HorseRace {
         /// Initialize the contract with 6 horses and reward multipliers
+        /// Default fee distribution: Dev 5%, Operator 5%, Pot 90%
         #[ink(constructor)]
         pub fn new() -> Self {
             let caller = Self::env().caller();
@@ -249,6 +297,13 @@ mod horse_race {
                 betting_start_time: Self::env().block_timestamp(),
                 total_pot: 0,
                 reward_multipliers: Vec::new(),
+                balances: Mapping::default(),
+                dev_address: caller,
+                operator_address: caller,
+                dev_fee_bps: 500,      // 5%
+                operator_fee_bps: 500, // 5%
+                dev_balance: 0,
+                operator_balance: 0,
             };
             
             // Initialize horses
@@ -363,12 +418,64 @@ mod horse_race {
         }
 
         // ========================================================================
+        // BALANCE FUNCTIONS
+        // ========================================================================
+
+        /// Deposit assets into the contract (called by external asset transfer)
+        /// In production, this would be called by an asset pallet or bridge
+        #[ink(message)]
+        pub fn deposit(&mut self, account: AccountId, amount: u128) -> Result<()> {
+            // Only owner can credit deposits (in production, this would be an asset pallet callback)
+            if self.env().caller() != self.owner {
+                return Err(Error::NotOwner);
+            }
+
+            let current_balance = self.balances.get(account).unwrap_or(0);
+            self.balances.insert(account, &(current_balance + amount));
+
+            self.env().emit_event(Deposited { account, amount });
+            Ok(())
+        }
+
+        /// Withdraw assets from the contract
+        #[ink(message)]
+        pub fn withdraw(&mut self, amount: u128) -> Result<()> {
+            let caller = self.env().caller();
+            let current_balance = self.balances.get(caller).unwrap_or(0);
+
+            if current_balance < amount {
+                return Err(Error::InsufficientBalance);
+            }
+
+            self.balances.insert(caller, &(current_balance - amount));
+
+            self.env().emit_event(Withdrawn {
+                account: caller,
+                amount,
+            });
+            Ok(())
+        }
+
+        /// Get balance for an account
+        #[ink(message)]
+        pub fn get_balance(&self, account: AccountId) -> u128 {
+            self.balances.get(account).unwrap_or(0)
+        }
+
+        // ========================================================================
         // BETTING FUNCTIONS
         // ========================================================================
 
         /// Place an exacta bet (predict 1st and 2nd place in order)
-        #[ink(message, payable)]
-        pub fn place_exacta_bet(&mut self, first_pick: u8, second_pick: u8) -> Result<()> {
+        /// Only the operator (owner) can call this function
+        /// Deducts the bet amount from the bettor's asset balance
+        #[ink(message)]
+        pub fn place_exacta_bet(&mut self, bettor: AccountId, first_pick: u8, second_pick: u8, amount: u128) -> Result<()> {
+            // Only operator can place bets
+            if self.env().caller() != self.owner {
+                return Err(Error::NotOwner);
+            }
+
             // Validate race status
             if self.status != RaceStatus::Betting {
                 return Err(Error::BettingClosed);
@@ -382,16 +489,30 @@ mod horse_race {
                 return Err(Error::SameHorsePicked);
             }
 
-            let caller = self.env().caller();
-            let amount = self.env().transferred_value();
-
             if amount == 0 {
                 return Err(Error::ZeroBetAmount);
             }
 
-            // Create bet
+            // Check and deduct balance from bettor's account
+            let current_balance = self.balances.get(bettor).unwrap_or(0);
+            if current_balance < amount {
+                return Err(Error::InsufficientBalance);
+            }
+            self.balances.insert(bettor, &(current_balance - amount));
+
+            // Calculate fee distribution (basis points: 10000 = 100%)
+            let dev_share = (amount * self.dev_fee_bps as u128) / 10000;
+            let operator_share = (amount * self.operator_fee_bps as u128) / 10000;
+            let pot_share = amount - dev_share - operator_share;
+
+            // Distribute fees
+            self.dev_balance += dev_share;
+            self.operator_balance += operator_share;
+            self.total_pot += pot_share;
+
+            // Create bet (stores original amount for payout calculation)
             let bet = ExactaBet {
-                bettor: caller,
+                bettor,
                 amount,
                 first_pick,
                 second_pick,
@@ -399,14 +520,20 @@ mod horse_race {
             };
 
             self.bets.push(bet);
-            self.total_pot += amount;
 
-            // Emit event
+            // Emit events
             self.env().emit_event(BetPlaced {
-                bettor: caller,
+                bettor,
                 first_pick,
                 second_pick,
                 amount,
+            });
+
+            self.env().emit_event(BetDistributed {
+                bet_amount: amount,
+                dev_share,
+                operator_share,
+                pot_share,
             });
 
             Ok(())
@@ -420,7 +547,7 @@ mod horse_race {
 
         /// Get total pot for current race
         #[ink(message)]
-        pub fn get_total_pot(&self) -> Balance {
+        pub fn get_total_pot(&self) -> u128 {
             self.total_pot
         }
 
@@ -552,7 +679,7 @@ mod horse_race {
         // PAYOUT ENGINE
         // ========================================================================
 
-        /// Calculate and distribute payouts
+        /// Calculate and distribute payouts - credits winning amounts to user balances
         #[ink(message)]
         pub fn distribute_payouts(&mut self) -> Result<Vec<Payout>> {
             if self.status != RaceStatus::Finished {
@@ -568,6 +695,10 @@ mod horse_race {
                 if bet.first_pick == winning_exacta.0 && bet.second_pick == winning_exacta.1 {
                     // Winner!
                     let payout_amount = bet.amount * multiplier as u128;
+                    
+                    // Credit the payout to the winner's balance
+                    let current_balance = self.balances.get(bet.bettor).unwrap_or(0);
+                    self.balances.insert(bet.bettor, &(current_balance + payout_amount));
                     
                     let payout = Payout {
                         bettor: bet.bettor,
@@ -747,6 +878,102 @@ mod horse_race {
             }
             self.owner = new_owner;
             Ok(())
+        }
+
+        // ========================================================================
+        // FEE DISTRIBUTION FUNCTIONS
+        // ========================================================================
+
+        /// Set developer address (owner only)
+        #[ink(message)]
+        pub fn set_dev_address(&mut self, dev_address: AccountId) -> Result<()> {
+            if self.env().caller() != self.owner {
+                return Err(Error::NotOwner);
+            }
+            self.dev_address = dev_address;
+            Ok(())
+        }
+
+        /// Set operator address (owner only)
+        #[ink(message)]
+        pub fn set_operator_address(&mut self, operator_address: AccountId) -> Result<()> {
+            if self.env().caller() != self.owner {
+                return Err(Error::NotOwner);
+            }
+            self.operator_address = operator_address;
+            Ok(())
+        }
+
+        /// Set fee percentages (owner only)
+        /// dev_fee_bps and operator_fee_bps are in basis points (100 = 1%, 500 = 5%)
+        /// Total fees cannot exceed 10000 (100%)
+        #[ink(message)]
+        pub fn set_fee_percentages(&mut self, dev_fee_bps: u16, operator_fee_bps: u16) -> Result<()> {
+            if self.env().caller() != self.owner {
+                return Err(Error::NotOwner);
+            }
+            if dev_fee_bps + operator_fee_bps > 10000 {
+                return Err(Error::InvalidFeePercentage);
+            }
+            self.dev_fee_bps = dev_fee_bps;
+            self.operator_fee_bps = operator_fee_bps;
+            Ok(())
+        }
+
+        /// Withdraw accumulated developer fees (dev only)
+        #[ink(message)]
+        pub fn withdraw_dev_fees(&mut self) -> Result<u128> {
+            let caller = self.env().caller();
+            if caller != self.dev_address {
+                return Err(Error::NotOwner);
+            }
+            
+            let amount = self.dev_balance;
+            if amount == 0 {
+                return Err(Error::ZeroBetAmount);
+            }
+            
+            self.dev_balance = 0;
+            
+            // Credit to dev's balance
+            let current_balance = self.balances.get(caller).unwrap_or(0);
+            self.balances.insert(caller, &(current_balance + amount));
+            
+            Ok(amount)
+        }
+
+        /// Withdraw accumulated operator fees (operator only)
+        #[ink(message)]
+        pub fn withdraw_operator_fees(&mut self) -> Result<u128> {
+            let caller = self.env().caller();
+            if caller != self.operator_address {
+                return Err(Error::NotOwner);
+            }
+            
+            let amount = self.operator_balance;
+            if amount == 0 {
+                return Err(Error::ZeroBetAmount);
+            }
+            
+            self.operator_balance = 0;
+            
+            // Credit to operator's balance
+            let current_balance = self.balances.get(caller).unwrap_or(0);
+            self.balances.insert(caller, &(current_balance + amount));
+            
+            Ok(amount)
+        }
+
+        /// Get fee distribution configuration
+        #[ink(message)]
+        pub fn get_fee_config(&self) -> (AccountId, AccountId, u16, u16) {
+            (self.dev_address, self.operator_address, self.dev_fee_bps, self.operator_fee_bps)
+        }
+
+        /// Get accumulated fees
+        #[ink(message)]
+        pub fn get_accumulated_fees(&self) -> (u128, u128) {
+            (self.dev_balance, self.operator_balance)
         }
 
         // ========================================================================

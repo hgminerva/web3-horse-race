@@ -134,7 +134,7 @@ cd ..
 cargo contract build
 
 # Copy the new metadata
-cp target/ink/horse_race.json frontend/src/metadata.json
+cp target/ink/web3_horse_race.json frontend/src/metadata.json
 ```
 
 ## Tech Stack

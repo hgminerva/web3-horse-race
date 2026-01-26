@@ -24,7 +24,7 @@ import metadata from './metadata.json';
 
 // Default configuration
 const DEFAULT_WS_URL = 'wss://devnet02.xode.net';
-const CONTRACT_ADDRESS = 'XqCj5mxGMxvbSBv5oHkqRsto78t1eqojcDy73p2CAB8GMCQp1';
+const CONTRACT_ADDRESS = 'XqFZYcTdd6G7R8eFg2eQjkQicRviQHaUYpZgSk2CEYY25qbTp';
 
 // Horse data matching the contract
 const HORSES = [
@@ -640,7 +640,7 @@ function App() {
     setRaceResult(null);
 
     addLog('═══════════════════════════════════════════════════', 'header');
-    addLog('🏇 WEB3 HORSE RACE BETTING 🏇', 'header');
+    addLog('🏇 WEB3 HORSE RACE - BETTING ENGINE 🏇', 'header');
     addLog('═══════════════════════════════════════════════════', 'header');
     addLog('');
 
@@ -762,7 +762,7 @@ function App() {
       addLog(`  Multiplier: x${multiplier}`, 'info');
       addLog(`  Potential Win: ${(betAmountTokens * multiplier).toFixed(2)} tokens`, 'reward');
       
-      await sendTxAndWait('placeExactaBet', [playerBet.first, playerBet.second], betAmountSmallest);
+      await sendTxAndWait('placeExactaBet', [selectedAccount.address, playerBet.first, playerBet.second, betAmountSmallest.toString()]);
       addLog('✓ Bet placed successfully!', 'success');
       setPlayerBetPlaced(true);
       
@@ -784,6 +784,8 @@ function App() {
         addLog('Reason: Cannot pick the same horse for 1st and 2nd.', 'error');
       } else if (errorMsg.includes('ZeroBetAmount')) {
         addLog('Reason: Bet amount must be greater than 0.', 'error');
+      } else if (errorMsg.includes('InsufficientBalance')) {
+        addLog('Reason: Insufficient asset balance. Please deposit funds first.', 'error');
       } else if (errorMsg.includes('Inability to pay some fees')) {
         addLog('Reason: Insufficient balance to pay transaction fees.', 'error');
       } else {
@@ -1036,7 +1038,7 @@ function App() {
     try {
       setLoading(prev => ({ ...prev, placeBet: true }));
       const value = new BN(betAmount || '0');
-      await sendTxAndWait('placeExactaBet', [parseInt(firstPick), parseInt(secondPick)], value);
+      await sendTxAndWait('placeExactaBet', [selectedAccount.address, parseInt(firstPick), parseInt(secondPick), value.toString()]);
       setResults(prev => ({ ...prev, placeBet: { success: 'Bet placed successfully!' } }));
     } catch (error) {
       setResults(prev => ({ ...prev, placeBet: { error: error.message } }));
@@ -1048,7 +1050,7 @@ function App() {
   return (
     <div className="container">
       <header>
-        <h1>🏇 Horse Race</h1>
+        <h1>🏇 Web3 Horse Race</h1>
         <p>Horse Racing Betting Engine</p>
         <div className="connection-status">
           <span className={`status-dot ${isConnected ? 'connected' : ''}`}></span>
