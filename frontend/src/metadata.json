@@ -1,6 +1,6 @@
 {
   "source": {
-    "hash": "0x0964d9f11b6c7abe4a9e209f58fced96d4cc926d56e6e4576c0e53d6d63aa41f",
+    "hash": "0xf3750bb04fc3c4c23c482038e96e159211a8165a47452c96339443a809cc009a",
     "language": "ink! 5.1.1",
     "compiler": "rustc 1.92.0",
     "build_info": {
@@ -14,10 +14,10 @@
     }
   },
   "contract": {
-    "name": "karera_ds",
+    "name": "web3_horse_race",
     "version": "0.1.0",
     "authors": [
-      "[your_name] <[your_email]>"
+      "hgminerva <hgminerva@gmail.com>"
     ]
   },
   "image": null,
@@ -116,6 +116,47 @@
           {
             "docs": [],
             "indexed": false,
+            "label": "amount",
+            "type": {
+              "displayName": [
+                "Balance"
+              ],
+              "type": 9
+            }
+          },
+          {
+            "docs": [],
+            "indexed": false,
+            "label": "multiplier",
+            "type": {
+              "displayName": [
+                "u64"
+              ],
+              "type": 3
+            }
+          }
+        ],
+        "docs": [],
+        "label": "PayoutDistributed",
+        "module_path": "web3_horse_race::horse_race",
+        "signature_topic": "0xd21c5846762867c5421669d790914142f2fe4f58aa05edb4993c182ba85deca0"
+      },
+      {
+        "args": [
+          {
+            "docs": [],
+            "indexed": true,
+            "label": "bettor",
+            "type": {
+              "displayName": [
+                "AccountId"
+              ],
+              "type": 0
+            }
+          },
+          {
+            "docs": [],
+            "indexed": false,
             "label": "first_pick",
             "type": {
               "displayName": [
@@ -149,7 +190,7 @@
         ],
         "docs": [],
         "label": "BetPlaced",
-        "module_path": "karera_ds::karera_ds",
+        "module_path": "web3_horse_race::horse_race",
         "signature_topic": "0x371c36462b2e2c840cffc6403f4e38f14c1c64d8cb830122ed6644a9d51326e4"
       },
       {
@@ -190,7 +231,7 @@
         ],
         "docs": [],
         "label": "RaceStarted",
-        "module_path": "karera_ds::karera_ds",
+        "module_path": "web3_horse_race::horse_race",
         "signature_topic": "0x9019d1b94195660468b2fe1d4e0655e4d252192429fa81e899a833e8156d24be"
       },
       {
@@ -242,49 +283,8 @@
         ],
         "docs": [],
         "label": "RaceFinished",
-        "module_path": "karera_ds::karera_ds",
+        "module_path": "web3_horse_race::horse_race",
         "signature_topic": "0x650841d66b6e82992f889057179e90d826c484757a179d442d6ef583b7f51647"
-      },
-      {
-        "args": [
-          {
-            "docs": [],
-            "indexed": true,
-            "label": "bettor",
-            "type": {
-              "displayName": [
-                "AccountId"
-              ],
-              "type": 0
-            }
-          },
-          {
-            "docs": [],
-            "indexed": false,
-            "label": "amount",
-            "type": {
-              "displayName": [
-                "Balance"
-              ],
-              "type": 9
-            }
-          },
-          {
-            "docs": [],
-            "indexed": false,
-            "label": "multiplier",
-            "type": {
-              "displayName": [
-                "u64"
-              ],
-              "type": 3
-            }
-          }
-        ],
-        "docs": [],
-        "label": "PayoutDistributed",
-        "module_path": "karera_ds::karera_ds",
-        "signature_topic": "0xd21c5846762867c5421669d790914142f2fe4f58aa05edb4993c182ba85deca0"
       }
     ],
     "lang_error": {
@@ -1019,7 +1019,7 @@
               "name": "reward_multipliers"
             }
           ],
-          "name": "KareraDs"
+          "name": "HorseRace"
         }
       },
       "root_key": "0x00000000",
@@ -1119,8 +1119,8 @@
           }
         },
         "path": [
-          "karera_ds",
-          "karera_ds",
+          "web3_horse_race",
+          "horse_race",
           "Horse"
         ]
       }
@@ -1180,8 +1180,8 @@
           }
         },
         "path": [
-          "karera_ds",
-          "karera_ds",
+          "web3_horse_race",
+          "horse_race",
           "ExactaBet"
         ]
       }
@@ -1244,8 +1244,8 @@
           }
         },
         "path": [
-          "karera_ds",
-          "karera_ds",
+          "web3_horse_race",
+          "horse_race",
           "RaceResult"
         ]
       }
@@ -1316,8 +1316,8 @@
           }
         },
         "path": [
-          "karera_ds",
-          "karera_ds",
+          "web3_horse_race",
+          "horse_race",
           "Payout"
         ]
       }
@@ -1331,75 +1331,75 @@
               {
                 "name": "owner",
                 "type": 0,
-                "typeName": "<AccountId as::ink::storage::traits::AutoStorableHint<::ink::\nstorage::traits::ManualKey<98908251u32, ()>,>>::Type"
+                "typeName": "<AccountId as::ink::storage::traits::AutoStorableHint<::ink::\nstorage::traits::ManualKey<3945575772u32, ()>,>>::Type"
               },
               {
                 "name": "race_id",
                 "type": 3,
-                "typeName": "<u64 as::ink::storage::traits::AutoStorableHint<::ink::storage\n::traits::ManualKey<1594311944u32, ()>,>>::Type"
+                "typeName": "<u64 as::ink::storage::traits::AutoStorableHint<::ink::storage\n::traits::ManualKey<46921178u32, ()>,>>::Type"
               },
               {
                 "name": "status",
                 "type": 17,
-                "typeName": "<RaceStatus as::ink::storage::traits::AutoStorableHint<::ink::\nstorage::traits::ManualKey<1882041010u32, ()>,>>::Type"
+                "typeName": "<RaceStatus as::ink::storage::traits::AutoStorableHint<::ink::\nstorage::traits::ManualKey<3481146192u32, ()>,>>::Type"
               },
               {
                 "name": "horses",
                 "type": 4,
-                "typeName": "<Vec<Horse> as::ink::storage::traits::AutoStorableHint<::ink::\nstorage::traits::ManualKey<2668988004u32, ()>,>>::Type"
+                "typeName": "<Vec<Horse> as::ink::storage::traits::AutoStorableHint<::ink::\nstorage::traits::ManualKey<1328629644u32, ()>,>>::Type"
               },
               {
                 "name": "bets",
                 "type": 7,
-                "typeName": "<Vec<ExactaBet> as::ink::storage::traits::AutoStorableHint<::\nink::storage::traits::ManualKey<2416107327u32, ()>,>>::Type"
+                "typeName": "<Vec<ExactaBet> as::ink::storage::traits::AutoStorableHint<::\nink::storage::traits::ManualKey<636042483u32, ()>,>>::Type"
               },
               {
                 "name": "race_results",
                 "type": 10,
-                "typeName": "<Vec<RaceResult> as::ink::storage::traits::AutoStorableHint<::\nink::storage::traits::ManualKey<987363835u32, ()>,>>::Type"
+                "typeName": "<Vec<RaceResult> as::ink::storage::traits::AutoStorableHint<::\nink::storage::traits::ManualKey<2583884980u32, ()>,>>::Type"
               },
               {
                 "name": "latest_result",
                 "type": 11,
-                "typeName": "<RaceResult as::ink::storage::traits::AutoStorableHint<::ink::\nstorage::traits::ManualKey<460829257u32, ()>,>>::Type"
+                "typeName": "<RaceResult as::ink::storage::traits::AutoStorableHint<::ink::\nstorage::traits::ManualKey<2823707765u32, ()>,>>::Type"
               },
               {
                 "name": "payouts",
                 "type": 14,
-                "typeName": "<Vec<Payout> as::ink::storage::traits::AutoStorableHint<::ink\n::storage::traits::ManualKey<3042211185u32, ()>,>>::Type"
+                "typeName": "<Vec<Payout> as::ink::storage::traits::AutoStorableHint<::ink\n::storage::traits::ManualKey<3503846871u32, ()>,>>::Type"
               },
               {
                 "name": "current_seed",
                 "type": 3,
-                "typeName": "<u64 as::ink::storage::traits::AutoStorableHint<::ink::storage\n::traits::ManualKey<2777786254u32, ()>,>>::Type"
+                "typeName": "<u64 as::ink::storage::traits::AutoStorableHint<::ink::storage\n::traits::ManualKey<1088606515u32, ()>,>>::Type"
               },
               {
                 "name": "race_start_time",
                 "type": 3,
-                "typeName": "<u64 as::ink::storage::traits::AutoStorableHint<::ink::storage\n::traits::ManualKey<3879794802u32, ()>,>>::Type"
+                "typeName": "<u64 as::ink::storage::traits::AutoStorableHint<::ink::storage\n::traits::ManualKey<4027508874u32, ()>,>>::Type"
               },
               {
                 "name": "betting_start_time",
                 "type": 3,
-                "typeName": "<u64 as::ink::storage::traits::AutoStorableHint<::ink::storage\n::traits::ManualKey<2107958719u32, ()>,>>::Type"
+                "typeName": "<u64 as::ink::storage::traits::AutoStorableHint<::ink::storage\n::traits::ManualKey<2958071279u32, ()>,>>::Type"
               },
               {
                 "name": "total_pot",
                 "type": 9,
-                "typeName": "<Balance as::ink::storage::traits::AutoStorableHint<::ink::\nstorage::traits::ManualKey<3613607745u32, ()>,>>::Type"
+                "typeName": "<Balance as::ink::storage::traits::AutoStorableHint<::ink::\nstorage::traits::ManualKey<2073729692u32, ()>,>>::Type"
               },
               {
                 "name": "reward_multipliers",
                 "type": 12,
-                "typeName": "<Vec<u64> as::ink::storage::traits::AutoStorableHint<::ink::\nstorage::traits::ManualKey<1932850596u32, ()>,>>::Type"
+                "typeName": "<Vec<u64> as::ink::storage::traits::AutoStorableHint<::ink::\nstorage::traits::ManualKey<228226610u32, ()>,>>::Type"
               }
             ]
           }
         },
         "path": [
-          "karera_ds",
-          "karera_ds",
-          "KareraDs"
+          "web3_horse_race",
+          "horse_race",
+          "HorseRace"
         ]
       }
     },
@@ -1429,8 +1429,8 @@
           }
         },
         "path": [
-          "karera_ds",
-          "karera_ds",
+          "web3_horse_race",
+          "horse_race",
           "RaceStatus"
         ]
       }
@@ -1630,8 +1630,8 @@
           }
         },
         "path": [
-          "karera_ds",
-          "karera_ds",
+          "web3_horse_race",
+          "horse_race",
           "Error"
         ]
       }
@@ -2054,8 +2054,8 @@
           }
         },
         "path": [
-          "karera_ds",
-          "karera_ds",
+          "web3_horse_race",
+          "horse_race",
           "ExactaProbability"
         ]
       }

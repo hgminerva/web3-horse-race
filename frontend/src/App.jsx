@@ -24,7 +24,7 @@ import metadata from './metadata.json';
 
 // Default configuration
 const DEFAULT_WS_URL = 'wss://devnet02.xode.net';
-const CONTRACT_ADDRESS = 'XqCj5mxGMxvbSBv5oHkqRsto78t1eqojcDy73p2CAB8GMCQp1';
+const CONTRACT_ADDRESS = 'XqFZYcTdd6G7R8eFg2eQjkQicRviQHaUYpZgSk2CEYY25qbTp';
 
 // Horse data matching the contract
 const HORSES = [
@@ -435,7 +435,7 @@ function App() {
   const connectWallet = async () => {
     try {
       setLoading(prev => ({ ...prev, wallet: true }));
-      const extensions = await web3Enable('Karera DS');
+      const extensions = await web3Enable('Web3 Horse Race');
       
       if (extensions.length === 0) {
         setResults(prev => ({ 
@@ -640,7 +640,7 @@ function App() {
     setRaceResult(null);
 
     addLog('═══════════════════════════════════════════════════', 'header');
-    addLog('🏇 KARERA DS - HORSE RACE BETTING 🏇', 'header');
+    addLog('🏇 WEB3 HORSE RACE - BETTING ENGINE 🏇', 'header');
     addLog('═══════════════════════════════════════════════════', 'header');
     addLog('');
 
@@ -1048,7 +1048,7 @@ function App() {
   return (
     <div className="container">
       <header>
-        <h1>🏇 Karera DS</h1>
+        <h1>🏇 Web3 Horse Race</h1>
         <p>Horse Racing Betting Engine</p>
         <div className="connection-status">
           <span className={`status-dot ${isConnected ? 'connected' : ''}`}></span>
