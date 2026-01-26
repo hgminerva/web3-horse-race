@@ -1,0 +1,1048 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  min-height: 100vh;
+  color: #e0e0e0;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+header {
+  text-align: center;
+  padding: 30px 0;
+  border-bottom: 1px solid #333;
+  margin-bottom: 30px;
+}
+
+header h1 {
+  font-size: 2.5rem;
+  color: #00d9ff;
+  margin-bottom: 10px;
+}
+
+header p {
+  color: #888;
+}
+
+.connection-status {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 15px;
+}
+
+.status-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #ff4444;
+}
+
+.status-dot.connected {
+  background: #44ff44;
+}
+
+.sections {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  gap: 20px;
+}
+
+.section {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  padding: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.section h2 {
+  color: #00d9ff;
+  margin-bottom: 15px;
+  font-size: 1.3rem;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.section h2::before {
+  content: '';
+  width: 4px;
+  height: 20px;
+  background: #00d9ff;
+  border-radius: 2px;
+}
+
+.form-group {
+  margin-bottom: 15px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 5px;
+  color: #aaa;
+  font-size: 0.9rem;
+}
+
+.form-group input,
+.form-group select {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #444;
+  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.3);
+  color: #fff;
+  font-size: 1rem;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+  outline: none;
+  border-color: #00d9ff;
+}
+
+button {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+button.primary {
+  background: linear-gradient(135deg, #00d9ff 0%, #0099cc 100%);
+  color: #000;
+  font-weight: 600;
+}
+
+button.primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(0, 217, 255, 0.3);
+}
+
+button.secondary {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  border: 1px solid #444;
+}
+
+button.secondary:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.result-box {
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 8px;
+  padding: 15px;
+  margin-top: 15px;
+  font-family: monospace;
+  font-size: 0.9rem;
+  max-height: 200px;
+  overflow-y: auto;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+.result-box.success {
+  border-left: 3px solid #44ff44;
+}
+
+.result-box.error {
+  border-left: 3px solid #ff4444;
+}
+
+.button-group {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.connect-section {
+  background: rgba(0, 217, 255, 0.1);
+  border: 1px solid rgba(0, 217, 255, 0.3);
+  padding: 20px;
+  border-radius: 12px;
+  margin-bottom: 30px;
+}
+
+.connect-section h3 {
+  margin-bottom: 15px;
+}
+
+.accounts-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.account-btn {
+  padding: 8px 16px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid #444;
+  border-radius: 6px;
+  color: #fff;
+  cursor: pointer;
+  font-size: 0.85rem;
+}
+
+.account-btn:hover {
+  background: rgba(0, 217, 255, 0.2);
+  border-color: #00d9ff;
+}
+
+.account-btn.selected {
+  background: rgba(0, 217, 255, 0.3);
+  border-color: #00d9ff;
+}
+
+.loading {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  border-top-color: #00d9ff;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.info-text {
+  color: #888;
+  font-size: 0.85rem;
+  margin-top: 10px;
+}
+
+.data-display {
+  background: rgba(0, 0, 0, 0.2);
+  padding: 10px;
+  border-radius: 6px;
+  margin-top: 10px;
+}
+
+.data-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.data-item:last-child {
+  border-bottom: none;
+}
+
+.data-label {
+  color: #888;
+}
+
+.data-value {
+  color: #00d9ff;
+  font-family: monospace;
+}
+
+/* Simulation Section Styles */
+.simulation-section {
+  background: linear-gradient(135deg, rgba(255, 215, 0, 0.1) 0%, rgba(255, 140, 0, 0.1) 100%);
+  border: 2px solid rgba(255, 215, 0, 0.3);
+  border-radius: 16px;
+  padding: 25px;
+  margin-bottom: 30px;
+}
+
+.simulation-section h2 {
+  color: #ffd700;
+  font-size: 1.5rem;
+  margin-bottom: 10px;
+}
+
+.sim-controls {
+  display: flex;
+  gap: 15px;
+  margin: 20px 0;
+  flex-wrap: wrap;
+}
+
+.sim-btn {
+  padding: 12px 24px;
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.sim-btn.primary {
+  background: linear-gradient(135deg, #ffd700 0%, #ff8c00 100%);
+  color: #000;
+}
+
+.sim-btn.primary:hover {
+  box-shadow: 0 4px 20px rgba(255, 215, 0, 0.4);
+}
+
+.sim-phases {
+  display: flex;
+  gap: 10px;
+  margin: 20px 0;
+  flex-wrap: wrap;
+}
+
+.phase-indicator {
+  padding: 8px 16px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+  font-size: 0.9rem;
+  color: #888;
+  border: 1px solid #444;
+  transition: all 0.3s;
+}
+
+.phase-indicator.active {
+  background: rgba(255, 215, 0, 0.3);
+  border-color: #ffd700;
+  color: #ffd700;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+.phase-indicator.done {
+  background: rgba(68, 255, 68, 0.2);
+  border-color: #44ff44;
+  color: #44ff44;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+
+.sim-log {
+  background: rgba(0, 0, 0, 0.4);
+  border-radius: 12px;
+  padding: 20px;
+  max-height: 500px;
+  overflow-y: auto;
+  font-family: 'Consolas', 'Monaco', monospace;
+  font-size: 0.9rem;
+  line-height: 1.6;
+}
+
+.log-empty {
+  color: #888;
+  text-align: center;
+  padding: 40px 20px;
+  line-height: 2;
+}
+
+.log-entry {
+  margin: 2px 0;
+  padding: 2px 0;
+}
+
+.log-time {
+  color: #666;
+  margin-right: 10px;
+  font-size: 0.8rem;
+}
+
+.log-msg {
+  color: #e0e0e0;
+}
+
+.log-header .log-msg {
+  color: #ffd700;
+  font-weight: bold;
+  font-size: 1rem;
+}
+
+.log-phase .log-msg {
+  color: #00d9ff;
+  font-weight: bold;
+  margin-top: 10px;
+  display: block;
+}
+
+.log-success .log-msg {
+  color: #44ff44;
+}
+
+.log-error .log-msg {
+  color: #ff4444;
+}
+
+.log-warning .log-msg {
+  color: #ffaa00;
+}
+
+.log-race .log-msg {
+  color: #ff69b4;
+  font-weight: 500;
+}
+
+.log-reward .log-msg {
+  color: #ffd700;
+  font-weight: bold;
+}
+
+.log-info .log-msg {
+  color: #aaa;
+}
+
+/* Scrollbar styling for sim-log */
+.sim-log::-webkit-scrollbar {
+  width: 8px;
+}
+
+.sim-log::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 4px;
+}
+
+.sim-log::-webkit-scrollbar-thumb {
+  background: rgba(255, 215, 0, 0.4);
+  border-radius: 4px;
+}
+
+.sim-log::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 215, 0, 0.6);
+}
+
+/* Horse Cards */
+.horse-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 15px;
+}
+
+.horse-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 15px;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 8px;
+  border-left: 4px solid #888;
+}
+
+.horse-card .horse-id {
+  font-weight: bold;
+  color: #00d9ff;
+  min-width: 30px;
+}
+
+.horse-card .horse-name {
+  flex: 1;
+  color: #fff;
+}
+
+.horse-card .horse-strength {
+  color: #ffd700;
+  letter-spacing: 2px;
+}
+
+/* Race Result Card */
+.race-result-card {
+  background: linear-gradient(135deg, rgba(255, 215, 0, 0.15) 0%, rgba(255, 140, 0, 0.1) 100%);
+  border: 1px solid rgba(255, 215, 0, 0.3);
+  border-radius: 12px;
+  padding: 20px;
+  margin: 20px 0;
+}
+
+.race-result-card h3 {
+  color: #ffd700;
+  margin-bottom: 15px;
+  text-align: center;
+}
+
+.result-grid {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.place-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 15px 25px;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 12px;
+  min-width: 120px;
+}
+
+.place-card.place-1 {
+  border: 2px solid #ffd700;
+  background: rgba(255, 215, 0, 0.15);
+}
+
+.place-card.place-2 {
+  border: 2px solid #c0c0c0;
+  background: rgba(192, 192, 192, 0.1);
+}
+
+.place-card.place-3 {
+  border: 2px solid #cd7f32;
+  background: rgba(205, 127, 50, 0.1);
+}
+
+.place-card .medal {
+  font-size: 2rem;
+  margin-bottom: 8px;
+}
+
+.place-card .horse-name {
+  font-weight: bold;
+  color: #fff;
+  text-align: center;
+}
+
+.place-card .horse-id {
+  color: #888;
+  font-size: 0.85rem;
+}
+
+/* Probability Table */
+.probability-table {
+  margin-top: 15px;
+  overflow-x: auto;
+}
+
+.probability-table table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+.probability-table th,
+.probability-table td {
+  padding: 10px;
+  text-align: left;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.probability-table th {
+  color: #00d9ff;
+  font-weight: 600;
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.probability-table td {
+  color: #e0e0e0;
+}
+
+.probability-table .multiplier {
+  color: #ffd700;
+  font-weight: bold;
+}
+
+.probability-table tr:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+/* Select styling */
+select {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%23888' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10l-5 5z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  padding-right: 35px;
+}
+
+/* Enhanced Section for Betting */
+.section .info-text {
+  margin-bottom: 15px;
+  font-size: 0.85rem;
+}
+
+/* Test Panel Toggle */
+.test-panel-toggle {
+  margin-top: 30px;
+  text-align: center;
+  padding: 20px;
+}
+
+/* Test Panel */
+.test-panel {
+  margin-top: 30px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(0, 217, 255, 0.3);
+  border-radius: 12px;
+  padding: 25px;
+}
+
+.test-panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.test-panel-header h2 {
+  color: #00d9ff;
+  margin: 0;
+}
+
+.close-btn {
+  background: transparent;
+  border: none;
+  color: #888;
+  font-size: 1.5rem;
+  cursor: pointer;
+  padding: 5px 10px;
+}
+
+.close-btn:hover {
+  color: #ff4444;
+}
+
+.test-controls {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.test-quick-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 20px;
+  padding: 10px;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 8px;
+}
+
+.test-quick-buttons span {
+  color: #888;
+  font-size: 0.85rem;
+  margin-right: 5px;
+}
+
+.mini-btn {
+  padding: 5px 10px;
+  font-size: 0.75rem;
+  background: rgba(0, 217, 255, 0.1);
+  border: 1px solid rgba(0, 217, 255, 0.3);
+  color: #00d9ff;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.mini-btn:hover:not(:disabled) {
+  background: rgba(0, 217, 255, 0.2);
+}
+
+.mini-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.test-results {
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 8px;
+  padding: 15px;
+  max-height: 500px;
+  overflow-y: auto;
+}
+
+.no-results {
+  color: #888;
+  text-align: center;
+  padding: 30px;
+  line-height: 1.8;
+}
+
+.test-result {
+  margin-bottom: 12px;
+  padding: 12px;
+  border-radius: 6px;
+  border-left: 3px solid #888;
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.test-result.test-success {
+  border-left-color: #44ff44;
+}
+
+.test-result.test-error {
+  border-left-color: #ff4444;
+}
+
+.test-result.test-warning {
+  border-left-color: #ffaa00;
+}
+
+.test-result.test-info {
+  border-left-color: #00d9ff;
+}
+
+.test-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+}
+
+.test-icon {
+  font-weight: bold;
+  font-size: 1rem;
+}
+
+.test-success .test-icon {
+  color: #44ff44;
+}
+
+.test-error .test-icon {
+  color: #ff4444;
+}
+
+.test-warning .test-icon {
+  color: #ffaa00;
+}
+
+.test-info .test-icon {
+  color: #00d9ff;
+}
+
+.test-name {
+  font-weight: 600;
+  color: #fff;
+}
+
+.test-time {
+  color: #666;
+  font-size: 0.8rem;
+  margin-left: auto;
+}
+
+.test-gas {
+  color: #888;
+  font-size: 0.75rem;
+  background: rgba(255, 255, 255, 0.1);
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
+.test-message {
+  margin: 0;
+  padding: 8px;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 4px;
+  font-family: 'Consolas', 'Monaco', monospace;
+  font-size: 0.8rem;
+  color: #aaa;
+  overflow-x: auto;
+  white-space: pre-wrap;
+  word-break: break-all;
+  max-height: 150px;
+  overflow-y: auto;
+}
+
+.test-success .test-message {
+  color: #aaffaa;
+}
+
+.test-error .test-message {
+  color: #ffaaaa;
+}
+
+/* Scrollbar for test results */
+.test-results::-webkit-scrollbar {
+  width: 6px;
+}
+
+.test-results::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.test-results::-webkit-scrollbar-thumb {
+  background: rgba(0, 217, 255, 0.4);
+  border-radius: 3px;
+}
+
+.test-results::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 217, 255, 0.6);
+}
+
+/* ========================================
+   BETTING TABLE STYLES
+   ======================================== */
+
+.horses-display {
+  margin: 20px 0;
+  padding: 15px;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 12px;
+}
+
+.horses-display h3 {
+  color: #ffd700;
+  margin-bottom: 15px;
+  text-align: center;
+}
+
+.horses-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 10px;
+}
+
+.horse-display-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  border: 2px solid;
+}
+
+.horse-num {
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: #00d9ff;
+}
+
+.horse-display-name {
+  font-size: 0.9rem;
+  color: #fff;
+  margin: 5px 0;
+}
+
+.horse-stars {
+  color: #ffd700;
+  letter-spacing: 1px;
+}
+
+/* Betting Section */
+.betting-section {
+  margin: 20px 0;
+  padding: 20px;
+  background: linear-gradient(135deg, rgba(255, 215, 0, 0.1) 0%, rgba(255, 140, 0, 0.05) 100%);
+  border: 1px solid rgba(255, 215, 0, 0.3);
+  border-radius: 12px;
+}
+
+.betting-section h3 {
+  color: #ffd700;
+  margin-bottom: 10px;
+}
+
+.betting-info {
+  margin-bottom: 15px;
+  padding: 10px;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 6px;
+  color: #00d9ff;
+  font-weight: 500;
+}
+
+/* Odds Table */
+.odds-table-container {
+  max-height: 400px;
+  overflow-y: auto;
+  border-radius: 8px;
+  margin-bottom: 20px;
+}
+
+.odds-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+.odds-table th {
+  position: sticky;
+  top: 0;
+  background: #1a1a2e;
+  color: #ffd700;
+  padding: 12px 8px;
+  text-align: left;
+  border-bottom: 2px solid #ffd700;
+  z-index: 1;
+}
+
+.odds-table td {
+  padding: 10px 8px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.odds-row {
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.odds-row:hover {
+  background: rgba(255, 215, 0, 0.1);
+}
+
+.odds-row.selected {
+  background: rgba(0, 217, 255, 0.2);
+  border-left: 3px solid #00d9ff;
+}
+
+.horse-tag {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: bold;
+  color: #000;
+  margin-right: 8px;
+}
+
+.multiplier-cell {
+  font-weight: bold;
+  font-size: 1rem;
+}
+
+.multiplier-cell.safe {
+  color: #44ff44;
+}
+
+.multiplier-cell.moderate {
+  color: #ffd700;
+}
+
+.multiplier-cell.risky {
+  color: #ff8800;
+}
+
+.multiplier-cell.longshot {
+  color: #ff4444;
+  text-shadow: 0 0 10px rgba(255, 68, 68, 0.5);
+}
+
+.select-btn {
+  padding: 6px 12px;
+  border: 1px solid #00d9ff;
+  background: transparent;
+  color: #00d9ff;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.8rem;
+  transition: all 0.2s;
+}
+
+.select-btn:hover:not(:disabled) {
+  background: rgba(0, 217, 255, 0.2);
+}
+
+.select-btn.selected {
+  background: #00d9ff;
+  color: #000;
+  font-weight: bold;
+}
+
+.select-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Bet Amount Section */
+.bet-amount-section {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  flex-wrap: wrap;
+  padding: 15px;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 8px;
+}
+
+.bet-amount-section label {
+  color: #ffd700;
+  font-weight: 500;
+}
+
+.bet-amount-section input {
+  width: 120px;
+  padding: 10px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 6px;
+  color: #fff;
+  font-size: 1rem;
+}
+
+.bet-amount-section input:focus {
+  outline: none;
+  border-color: #00d9ff;
+}
+
+.potential-win {
+  color: #44ff44;
+  font-size: 1.1rem;
+}
+
+.potential-win strong {
+  color: #ffd700;
+}
+
+/* Race Result Card Updates */
+.race-result-card.winner {
+  background: linear-gradient(135deg, rgba(68, 255, 68, 0.2) 0%, rgba(255, 215, 0, 0.2) 100%);
+  border: 2px solid #44ff44;
+  animation: winPulse 1s ease-in-out infinite;
+}
+
+.race-result-card.loser {
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+@keyframes winPulse {
+  0%, 100% { box-shadow: 0 0 20px rgba(68, 255, 68, 0.3); }
+  50% { box-shadow: 0 0 40px rgba(255, 215, 0, 0.5); }
+}
+
+.win-amount {
+  margin-top: 15px;
+  padding: 15px;
+  background: rgba(255, 215, 0, 0.2);
+  border-radius: 8px;
+  font-size: 1.3rem;
+  font-weight: bold;
+  color: #ffd700;
+  text-align: center;
+}
+
+/* Scrollbar for odds table */
+.odds-table-container::-webkit-scrollbar {
+  width: 8px;
+}
+
+.odds-table-container::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.odds-table-container::-webkit-scrollbar-thumb {
+  background: rgba(255, 215, 0, 0.4);
+  border-radius: 4px;
+}
+
+.odds-table-container::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 215, 0, 0.6);
+}
