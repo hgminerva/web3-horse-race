@@ -1,6 +1,6 @@
 # Web3 Horse Race Frontend
 
-A React-based frontend for testing and simulating the Karera DS (Horse Racing) smart contract on Substrate/Polkadot.
+A React-based frontend for testing and simulating the Horse Race smart contract on Substrate/Polkadot.
 
 ## Features
 
@@ -14,7 +14,7 @@ A React-based frontend for testing and simulating the Karera DS (Horse Racing) s
 
 - **Node.js** v18 or higher
 - **Polkadot.js Browser Extension** - [Download here](https://polkadot.js.org/extension/)
-- **Deployed Contract** - The Karera DS contract must be deployed to a Substrate node
+- **Deployed Contract** - The Horse Race contract must be deployed to a Substrate node
 
 ## Quick Start
 
@@ -134,7 +134,7 @@ cd ..
 cargo contract build
 
 # Copy the new metadata
-cp target/ink/karera_ds.json frontend/src/metadata.json
+cp target/ink/horse_race.json frontend/src/metadata.json
 ```
 
 ## Tech Stack

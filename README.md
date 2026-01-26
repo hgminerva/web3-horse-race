@@ -1,10 +1,10 @@
-# Karera DS - Horse Race Betting Smart Contract
+# Web3 Horse Race Betting Smart Contract
 
 A decentralized horse race betting system built with **Ink!** smart contracts on Substrate, featuring a React-based frontend for interactive betting.
 
 ## Overview
 
-Karera DS is a provably fair horse racing game where players can place **Exacta bets** - predicting both the 1st and 2nd place finishers in exact order. The race outcomes are determined by a probability-weighted selection algorithm that matches the mathematical odds displayed to players.
+Web3 Horse Race is a provably fair horse racing game where players can place **Exacta bets** - predicting both the 1st and 2nd place finishers in exact order. The race outcomes are determined by a probability-weighted selection algorithm that matches the mathematical odds displayed to players.
 
 ## Features
 
@@ -52,7 +52,7 @@ Where:
 ## Project Structure
 
 ```
-karera_ds/
+horse_race/
 ├── lib.rs                    # Ink! smart contract
 ├── Cargo.toml                # Rust dependencies
 ├── SMART_CONTRACT_DOCUMENTATION.md
@@ -84,9 +84,9 @@ cargo contract build --release
 ```
 
 The compiled contract will be in `target/ink/`:
-- `karera_ds.contract` - Deployable bundle
-- `karera_ds.wasm` - Contract code
-- `karera_ds.json` - Metadata/ABI
+- `horse_race.contract` - Deployable bundle
+- `horse_race.wasm` - Contract code
+- `horse_race.json` - Metadata/ABI
 
 ### Deploying the Contract
 

@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Karera DS - Contract Simulation Test Script
+ * Horse Race - Contract Simulation Test Script
  * 
  * This script tests the horse racing contract by:
  * 1. Connecting to the blockchain
@@ -40,7 +40,7 @@ function parseArgs() {
       config.contractAddress = args[++i];
     } else if (args[i] === '--help') {
       console.log(`
-Karera DS - Contract Simulation Test Script
+Horse Race - Contract Simulation Test Script
 
 Usage: node test-simulation.js [options]
 
@@ -141,7 +141,7 @@ function recordFail(testName, error) {
 async function main() {
   const config = parseArgs();
   
-  logHeader('KARERA DS - CONTRACT SIMULATION TEST');
+  logHeader('HORSE RACE - CONTRACT SIMULATION TEST');
   log(`WebSocket: ${config.wsUrl}`, 'cyan');
   log(`Contract: ${config.contractAddress}`, 'cyan');
 

@@ -1,4 +1,4 @@
-# Karera Horse Betting Engine
+# Web3 Horse Race Betting Engine
 
 ## Smart Contract Documentation
 
@@ -25,7 +25,7 @@ A complete horse race betting and simulation engine built in Ink! for Substrate/
 
 ## Overview
 
-The Karera Horse Betting Engine is a decentralized horse racing simulation and betting platform. It features:
+The Web3 Horse Race Betting Engine is a decentralized horse racing simulation and betting platform. It features:
 
 - **6 horses** with strength-based racing mechanics
 - **3-phase race simulation** with varying speed modifiers
@@ -39,7 +39,7 @@ The Karera Horse Betting Engine is a decentralized horse racing simulation and b
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│                    KARERA HORSE BETTING ENGINE                   │
+│                    WEB3 HORSE RACE BETTING ENGINE                │
 ├─────────────────────────────────────────────────────────────────┤
 │                                                                  │
 │  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐           │

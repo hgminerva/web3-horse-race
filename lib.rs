@@ -5,7 +5,7 @@
 #![allow(clippy::cast_sign_loss)]
 #![allow(clippy::needless_range_loop)]
 
-//! # Karera Horse Betting Engine
+//! # Horse Race Betting Engine
 //! 
 //! A complete horse race betting and simulation engine built in Ink!.
 //! 
@@ -32,7 +32,7 @@ const HORSE_STRENGTHS: [u64; NUM_HORSES] = [6, 5, 4, 3, 2, 1];
 const TOTAL_STRENGTH: u64 = 21;
 
 #[ink::contract]
-mod karera_ds {
+mod horse_race {
     use super::*;
 
     // ============================================================================
@@ -184,7 +184,7 @@ mod karera_ds {
     // ============================================================================
 
     #[ink(storage)]
-    pub struct KareraDs {
+    pub struct HorseRace {
         /// Contract owner
         owner: AccountId,
         
@@ -230,7 +230,7 @@ mod karera_ds {
     // IMPLEMENTATION
     // ============================================================================
 
-    impl KareraDs {
+    impl HorseRace {
         /// Initialize the contract with 6 horses and reward multipliers
         #[ink(constructor)]
         pub fn new() -> Self {
@@ -777,7 +777,7 @@ mod karera_ds {
 
         #[ink::test]
         fn initialization_works() {
-            let contract = KareraDs::new();
+            let contract = HorseRace::new();
             
             // Check horses initialized
             assert_eq!(contract.get_horses().len(), 6);
@@ -793,7 +793,7 @@ mod karera_ds {
 
         #[ink::test]
         fn normalized_strength_works() {
-            let contract = KareraDs::new();
+            let contract = HorseRace::new();
             
             // H[0] strength = 6, normalized = 6/21 * 10000 = 2857
             let ns = contract.get_normalized_strength(0);
@@ -806,7 +806,7 @@ mod karera_ds {
 
         #[ink::test]
         fn exacta_probability_works() {
-            let contract = KareraDs::new();
+            let contract = HorseRace::new();
             
             // P(0 → 1) should be highest
             let p_01 = contract.calculate_exacta_probability(0, 1);
@@ -818,7 +818,7 @@ mod karera_ds {
 
         #[ink::test]
         fn multipliers_initialized() {
-            let contract = KareraDs::new();
+            let contract = HorseRace::new();
             
             // Check specific multipliers
             assert_eq!(contract.get_reward_multiplier(0, 5), 60);
@@ -828,7 +828,7 @@ mod karera_ds {
 
         #[ink::test]
         fn probability_table_works() {
-            let contract = KareraDs::new();
+            let contract = HorseRace::new();
             let table = contract.get_exacta_probability_table();
             
             // Should have entries for combinations with multipliers
@@ -845,7 +845,7 @@ mod karera_ds {
 
         #[ink::test]
         fn race_simulation_deterministic() {
-            let mut contract = KareraDs::new();
+            let mut contract = HorseRace::new();
             
             // Run with same seed twice
             let result1 = contract.simulate_complete_race(12345).unwrap();
@@ -871,14 +871,14 @@ mod karera_ds {
 
         #[ink_e2e::test]
         async fn e2e_initialization(mut client: ink_e2e::Client<C, E>) -> E2EResult<()> {
-            let mut constructor = KareraDsRef::new();
+            let mut constructor = HorseRaceRef::new();
             let contract = client
-                .instantiate("karera_ds", &ink_e2e::alice(), &mut constructor)
+                .instantiate("horse_race", &ink_e2e::alice(), &mut constructor)
                 .submit()
                 .await
                 .expect("instantiate failed");
             
-            let call_builder = contract.call_builder::<KareraDs>();
+            let call_builder = contract.call_builder::<HorseRace>();
 
             // Check horses
             let get_horses = call_builder.get_horses();
