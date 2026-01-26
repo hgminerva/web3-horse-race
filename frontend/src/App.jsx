@@ -762,7 +762,7 @@ function App() {
       addLog(`  Multiplier: x${multiplier}`, 'info');
       addLog(`  Potential Win: ${(betAmountTokens * multiplier).toFixed(2)} tokens`, 'reward');
       
-      await sendTxAndWait('placeExactaBet', [playerBet.first, playerBet.second, betAmountSmallest.toString()]);
+      await sendTxAndWait('placeExactaBet', [selectedAccount.address, playerBet.first, playerBet.second, betAmountSmallest.toString()]);
       addLog('✓ Bet placed successfully!', 'success');
       setPlayerBetPlaced(true);
       
@@ -1038,7 +1038,7 @@ function App() {
     try {
       setLoading(prev => ({ ...prev, placeBet: true }));
       const value = new BN(betAmount || '0');
-      await sendTxAndWait('placeExactaBet', [parseInt(firstPick), parseInt(secondPick), value.toString()]);
+      await sendTxAndWait('placeExactaBet', [selectedAccount.address, parseInt(firstPick), parseInt(secondPick), value.toString()]);
       setResults(prev => ({ ...prev, placeBet: { success: 'Bet placed successfully!' } }));
     } catch (error) {
       setResults(prev => ({ ...prev, placeBet: { error: error.message } }));

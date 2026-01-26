@@ -1,6 +1,6 @@
 {
   "source": {
-    "hash": "0xefbb5c3654e4253357808ba876ec8a3269c059dcd7bb8377f48fae4c3964d516",
+    "hash": "0x3fe08f20b0afefae9cb2cff3cf811c297958c7f72ab3d22431e10e0150433bbb",
     "language": "ink! 5.1.1",
     "compiler": "rustc 1.92.0",
     "build_info": {
@@ -452,6 +452,15 @@
       {
         "args": [
           {
+            "label": "bettor",
+            "type": {
+              "displayName": [
+                "AccountId"
+              ],
+              "type": 0
+            }
+          },
+          {
             "label": "first_pick",
             "type": {
               "displayName": [
@@ -482,7 +491,8 @@
         "default": false,
         "docs": [
           " Place an exacta bet (predict 1st and 2nd place in order)",
-          " Deducts the bet amount from the caller's asset balance"
+          " Only the operator (owner) can call this function",
+          " Deducts the bet amount from the bettor's asset balance"
         ],
         "label": "place_exacta_bet",
         "mutates": true,

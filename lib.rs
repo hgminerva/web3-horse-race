@@ -432,9 +432,15 @@ mod horse_race {
         // ========================================================================
 
         /// Place an exacta bet (predict 1st and 2nd place in order)
-        /// Deducts the bet amount from the caller's asset balance
+        /// Only the operator (owner) can call this function
+        /// Deducts the bet amount from the bettor's asset balance
         #[ink(message)]
-        pub fn place_exacta_bet(&mut self, first_pick: u8, second_pick: u8, amount: u128) -> Result<()> {
+        pub fn place_exacta_bet(&mut self, bettor: AccountId, first_pick: u8, second_pick: u8, amount: u128) -> Result<()> {
+            // Only operator can place bets
+            if self.env().caller() != self.owner {
+                return Err(Error::NotOwner);
+            }
+
             // Validate race status
             if self.status != RaceStatus::Betting {
                 return Err(Error::BettingClosed);
@@ -452,18 +458,16 @@ mod horse_race {
                 return Err(Error::ZeroBetAmount);
             }
 
-            let caller = self.env().caller();
-            
-            // Check and deduct balance
-            let current_balance = self.balances.get(caller).unwrap_or(0);
+            // Check and deduct balance from bettor's account
+            let current_balance = self.balances.get(bettor).unwrap_or(0);
             if current_balance < amount {
                 return Err(Error::InsufficientBalance);
             }
-            self.balances.insert(caller, &(current_balance - amount));
+            self.balances.insert(bettor, &(current_balance - amount));
 
             // Create bet
             let bet = ExactaBet {
-                bettor: caller,
+                bettor,
                 amount,
                 first_pick,
                 second_pick,
@@ -475,7 +479,7 @@ mod horse_race {
 
             // Emit event
             self.env().emit_event(BetPlaced {
-                bettor: caller,
+                bettor,
                 first_pick,
                 second_pick,
                 amount,
