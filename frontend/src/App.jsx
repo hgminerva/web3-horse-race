@@ -435,7 +435,7 @@ function App() {
   const connectWallet = async () => {
     try {
       setLoading(prev => ({ ...prev, wallet: true }));
-      const extensions = await web3Enable('Karera DS');
+      const extensions = await web3Enable('Web3 Horse Race');
       
       if (extensions.length === 0) {
         setResults(prev => ({ 
@@ -640,7 +640,7 @@ function App() {
     setRaceResult(null);
 
     addLog('═══════════════════════════════════════════════════', 'header');
-    addLog('🏇 KARERA DS - HORSE RACE BETTING 🏇', 'header');
+    addLog('🏇 WEB3 HORSE RACE BETTING 🏇', 'header');
     addLog('═══════════════════════════════════════════════════', 'header');
     addLog('');
 
@@ -1048,7 +1048,7 @@ function App() {
   return (
     <div className="container">
       <header>
-        <h1>🏇 Karera DS</h1>
+        <h1>🏇 Horse Race</h1>
         <p>Horse Racing Betting Engine</p>
         <div className="connection-status">
           <span className={`status-dot ${isConnected ? 'connected' : ''}`}></span>

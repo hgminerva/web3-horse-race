@@ -55,7 +55,7 @@ Where:
 horse_race/
 ├── lib.rs                    # Ink! smart contract
 ├── Cargo.toml                # Rust dependencies
-├── SMART_CONTRACT_DOCUMENTATION.md
+├── DOCS.md
 ├── README.md
 └── frontend/
     ├── src/
