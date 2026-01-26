@@ -3211,14 +3211,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "karera_ds"
-version = "0.1.0"
-dependencies = [
- "ink",
- "ink_e2e",
-]
-
-[[package]]
 name = "keccak"
 version = "0.1.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -7349,6 +7341,14 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "bbf35b87ed352f9ab6cd0732abde5a67dd6153dfd02c493e61459218b19456fa"
 dependencies = [
  "wast",
+]
+
+[[package]]
+name = "web3_horse_race"
+version = "0.1.0"
+dependencies = [
+ "ink",
+ "ink_e2e",
 ]
 
 [[package]]

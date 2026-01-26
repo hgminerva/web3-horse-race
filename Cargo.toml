@@ -1,5 +1,5 @@
 [package]
-name = "Web3 Horse Race"
+name = "web3_horse_race"
 version = "0.1.0"
 authors = ["hgminerva <hgminerva@gmail.com>"]
 edition = "2021"
