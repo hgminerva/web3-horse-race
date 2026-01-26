@@ -62,6 +62,8 @@ mod horse_race {
         RaceNotFinished,
         /// Insufficient balance to place bet or withdraw
         InsufficientBalance,
+        /// Invalid fee percentage (total exceeds 100%)
+        InvalidFeePercentage,
     }
 
     /// Result type for contract operations
@@ -195,6 +197,14 @@ mod horse_race {
         amount: u128,
     }
 
+    #[ink(event)]
+    pub struct BetDistributed {
+        bet_amount: u128,
+        dev_share: u128,
+        operator_share: u128,
+        pot_share: u128,
+    }
+
     // ============================================================================
     // CONTRACT STORAGE
     // ============================================================================
@@ -243,6 +253,24 @@ mod horse_race {
         
         /// User balances (asset balances, not native tokens)
         balances: Mapping<AccountId, u128>,
+        
+        /// Developer address for fee distribution
+        dev_address: AccountId,
+        
+        /// Operator address for fee distribution
+        operator_address: AccountId,
+        
+        /// Developer fee percentage (basis points, e.g., 500 = 5%)
+        dev_fee_bps: u16,
+        
+        /// Operator fee percentage (basis points, e.g., 500 = 5%)
+        operator_fee_bps: u16,
+        
+        /// Accumulated developer fees
+        dev_balance: u128,
+        
+        /// Accumulated operator fees
+        operator_balance: u128,
     }
 
     // ============================================================================
@@ -251,6 +279,7 @@ mod horse_race {
 
     impl HorseRace {
         /// Initialize the contract with 6 horses and reward multipliers
+        /// Default fee distribution: Dev 5%, Operator 5%, Pot 90%
         #[ink(constructor)]
         pub fn new() -> Self {
             let caller = Self::env().caller();
@@ -269,6 +298,12 @@ mod horse_race {
                 total_pot: 0,
                 reward_multipliers: Vec::new(),
                 balances: Mapping::default(),
+                dev_address: caller,
+                operator_address: caller,
+                dev_fee_bps: 500,      // 5%
+                operator_fee_bps: 500, // 5%
+                dev_balance: 0,
+                operator_balance: 0,
             };
             
             // Initialize horses
@@ -465,7 +500,17 @@ mod horse_race {
             }
             self.balances.insert(bettor, &(current_balance - amount));
 
-            // Create bet
+            // Calculate fee distribution (basis points: 10000 = 100%)
+            let dev_share = (amount * self.dev_fee_bps as u128) / 10000;
+            let operator_share = (amount * self.operator_fee_bps as u128) / 10000;
+            let pot_share = amount - dev_share - operator_share;
+
+            // Distribute fees
+            self.dev_balance += dev_share;
+            self.operator_balance += operator_share;
+            self.total_pot += pot_share;
+
+            // Create bet (stores original amount for payout calculation)
             let bet = ExactaBet {
                 bettor,
                 amount,
@@ -475,14 +520,20 @@ mod horse_race {
             };
 
             self.bets.push(bet);
-            self.total_pot += amount;
 
-            // Emit event
+            // Emit events
             self.env().emit_event(BetPlaced {
                 bettor,
                 first_pick,
                 second_pick,
                 amount,
+            });
+
+            self.env().emit_event(BetDistributed {
+                bet_amount: amount,
+                dev_share,
+                operator_share,
+                pot_share,
             });
 
             Ok(())
@@ -827,6 +878,102 @@ mod horse_race {
             }
             self.owner = new_owner;
             Ok(())
+        }
+
+        // ========================================================================
+        // FEE DISTRIBUTION FUNCTIONS
+        // ========================================================================
+
+        /// Set developer address (owner only)
+        #[ink(message)]
+        pub fn set_dev_address(&mut self, dev_address: AccountId) -> Result<()> {
+            if self.env().caller() != self.owner {
+                return Err(Error::NotOwner);
+            }
+            self.dev_address = dev_address;
+            Ok(())
+        }
+
+        /// Set operator address (owner only)
+        #[ink(message)]
+        pub fn set_operator_address(&mut self, operator_address: AccountId) -> Result<()> {
+            if self.env().caller() != self.owner {
+                return Err(Error::NotOwner);
+            }
+            self.operator_address = operator_address;
+            Ok(())
+        }
+
+        /// Set fee percentages (owner only)
+        /// dev_fee_bps and operator_fee_bps are in basis points (100 = 1%, 500 = 5%)
+        /// Total fees cannot exceed 10000 (100%)
+        #[ink(message)]
+        pub fn set_fee_percentages(&mut self, dev_fee_bps: u16, operator_fee_bps: u16) -> Result<()> {
+            if self.env().caller() != self.owner {
+                return Err(Error::NotOwner);
+            }
+            if dev_fee_bps + operator_fee_bps > 10000 {
+                return Err(Error::InvalidFeePercentage);
+            }
+            self.dev_fee_bps = dev_fee_bps;
+            self.operator_fee_bps = operator_fee_bps;
+            Ok(())
+        }
+
+        /// Withdraw accumulated developer fees (dev only)
+        #[ink(message)]
+        pub fn withdraw_dev_fees(&mut self) -> Result<u128> {
+            let caller = self.env().caller();
+            if caller != self.dev_address {
+                return Err(Error::NotOwner);
+            }
+            
+            let amount = self.dev_balance;
+            if amount == 0 {
+                return Err(Error::ZeroBetAmount);
+            }
+            
+            self.dev_balance = 0;
+            
+            // Credit to dev's balance
+            let current_balance = self.balances.get(caller).unwrap_or(0);
+            self.balances.insert(caller, &(current_balance + amount));
+            
+            Ok(amount)
+        }
+
+        /// Withdraw accumulated operator fees (operator only)
+        #[ink(message)]
+        pub fn withdraw_operator_fees(&mut self) -> Result<u128> {
+            let caller = self.env().caller();
+            if caller != self.operator_address {
+                return Err(Error::NotOwner);
+            }
+            
+            let amount = self.operator_balance;
+            if amount == 0 {
+                return Err(Error::ZeroBetAmount);
+            }
+            
+            self.operator_balance = 0;
+            
+            // Credit to operator's balance
+            let current_balance = self.balances.get(caller).unwrap_or(0);
+            self.balances.insert(caller, &(current_balance + amount));
+            
+            Ok(amount)
+        }
+
+        /// Get fee distribution configuration
+        #[ink(message)]
+        pub fn get_fee_config(&self) -> (AccountId, AccountId, u16, u16) {
+            (self.dev_address, self.operator_address, self.dev_fee_bps, self.operator_fee_bps)
+        }
+
+        /// Get accumulated fees
+        #[ink(message)]
+        pub fn get_accumulated_fees(&self) -> (u128, u128) {
+            (self.dev_balance, self.operator_balance)
         }
 
         // ========================================================================
