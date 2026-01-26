@@ -762,7 +762,7 @@ function App() {
       addLog(`  Multiplier: x${multiplier}`, 'info');
       addLog(`  Potential Win: ${(betAmountTokens * multiplier).toFixed(2)} tokens`, 'reward');
       
-      await sendTxAndWait('placeExactaBet', [playerBet.first, playerBet.second], betAmountSmallest);
+      await sendTxAndWait('placeExactaBet', [playerBet.first, playerBet.second, betAmountSmallest.toString()]);
       addLog('✓ Bet placed successfully!', 'success');
       setPlayerBetPlaced(true);
       
@@ -784,6 +784,8 @@ function App() {
         addLog('Reason: Cannot pick the same horse for 1st and 2nd.', 'error');
       } else if (errorMsg.includes('ZeroBetAmount')) {
         addLog('Reason: Bet amount must be greater than 0.', 'error');
+      } else if (errorMsg.includes('InsufficientBalance')) {
+        addLog('Reason: Insufficient asset balance. Please deposit funds first.', 'error');
       } else if (errorMsg.includes('Inability to pay some fees')) {
         addLog('Reason: Insufficient balance to pay transaction fees.', 'error');
       } else {
@@ -1036,7 +1038,7 @@ function App() {
     try {
       setLoading(prev => ({ ...prev, placeBet: true }));
       const value = new BN(betAmount || '0');
-      await sendTxAndWait('placeExactaBet', [parseInt(firstPick), parseInt(secondPick)], value);
+      await sendTxAndWait('placeExactaBet', [parseInt(firstPick), parseInt(secondPick), value.toString()]);
       setResults(prev => ({ ...prev, placeBet: { success: 'Bet placed successfully!' } }));
     } catch (error) {
       setResults(prev => ({ ...prev, placeBet: { error: error.message } }));

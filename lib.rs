@@ -18,6 +18,7 @@
 
 use ink::prelude::vec::Vec;
 use ink::prelude::vec;
+use ink::storage::Mapping;
 
 /// Precision for fixed-point arithmetic (4 decimal places)
 const PRECISION: u64 = 10000;
@@ -59,6 +60,8 @@ mod horse_race {
         RaceNotInProgress,
         /// Race not finished
         RaceNotFinished,
+        /// Insufficient balance to place bet or withdraw
+        InsufficientBalance,
     }
 
     /// Result type for contract operations
@@ -80,14 +83,13 @@ mod horse_race {
         pub base_speed: u64,           // Bs[i] = 14 + strength
     }
 
-    /// Horse state during race simulation
     /// Exacta bet structure (predicting 1st and 2nd in exact order)
     #[derive(Debug, Clone, PartialEq, Eq)]
     #[ink::scale_derive(Encode, Decode, TypeInfo)]
     #[cfg_attr(feature = "std", derive(ink::storage::traits::StorageLayout))]
     pub struct ExactaBet {
         pub bettor: AccountId,
-        pub amount: Balance,
+        pub amount: u128,              // Bet amount in asset units
         pub first_pick: u8,            // Predicted 1st place horse ID
         pub second_pick: u8,           // Predicted 2nd place horse ID
         pub timestamp: u64,
@@ -102,7 +104,7 @@ mod horse_race {
         pub rankings: Vec<u8>,         // Horse IDs in finish order [1st, 2nd, 3rd, ...]
         pub finish_times: Vec<u64>,    // Finish times for each position
         pub winning_exacta: (u8, u8),  // (1st, 2nd)
-        pub total_pot: Balance,
+        pub total_pot: u128,           // Total pot in asset units
         pub seed_used: u64,
     }
 
@@ -112,9 +114,9 @@ mod horse_race {
     #[cfg_attr(feature = "std", derive(ink::storage::traits::StorageLayout))]
     pub struct Payout {
         pub bettor: AccountId,
-        pub bet_amount: Balance,
+        pub bet_amount: u128,          // Original bet in asset units
         pub multiplier: u64,
-        pub payout_amount: Balance,
+        pub payout_amount: u128,       // Payout in asset units
         pub exacta: (u8, u8),
     }
 
@@ -168,15 +170,29 @@ mod horse_race {
         bettor: AccountId,
         first_pick: u8,
         second_pick: u8,
-        amount: Balance,
+        amount: u128,
     }
 
     #[ink(event)]
     pub struct PayoutDistributed {
         #[ink(topic)]
         bettor: AccountId,
-        amount: Balance,
+        amount: u128,
         multiplier: u64,
+    }
+
+    #[ink(event)]
+    pub struct Deposited {
+        #[ink(topic)]
+        account: AccountId,
+        amount: u128,
+    }
+
+    #[ink(event)]
+    pub struct Withdrawn {
+        #[ink(topic)]
+        account: AccountId,
+        amount: u128,
     }
 
     // ============================================================================
@@ -219,11 +235,14 @@ mod horse_race {
         betting_start_time: u64,
         
         /// Total pot for current race
-        total_pot: Balance,
+        total_pot: u128,
         
         /// Exacta reward multipliers (stored as flat array for gas efficiency)
         /// Format: multipliers[first * 6 + second] = multiplier
         reward_multipliers: Vec<u64>,
+        
+        /// User balances (asset balances, not native tokens)
+        balances: Mapping<AccountId, u128>,
     }
 
     // ============================================================================
@@ -249,6 +268,7 @@ mod horse_race {
                 betting_start_time: Self::env().block_timestamp(),
                 total_pot: 0,
                 reward_multipliers: Vec::new(),
+                balances: Mapping::default(),
             };
             
             // Initialize horses
@@ -363,12 +383,58 @@ mod horse_race {
         }
 
         // ========================================================================
+        // BALANCE FUNCTIONS
+        // ========================================================================
+
+        /// Deposit assets into the contract (called by external asset transfer)
+        /// In production, this would be called by an asset pallet or bridge
+        #[ink(message)]
+        pub fn deposit(&mut self, account: AccountId, amount: u128) -> Result<()> {
+            // Only owner can credit deposits (in production, this would be an asset pallet callback)
+            if self.env().caller() != self.owner {
+                return Err(Error::NotOwner);
+            }
+
+            let current_balance = self.balances.get(account).unwrap_or(0);
+            self.balances.insert(account, &(current_balance + amount));
+
+            self.env().emit_event(Deposited { account, amount });
+            Ok(())
+        }
+
+        /// Withdraw assets from the contract
+        #[ink(message)]
+        pub fn withdraw(&mut self, amount: u128) -> Result<()> {
+            let caller = self.env().caller();
+            let current_balance = self.balances.get(caller).unwrap_or(0);
+
+            if current_balance < amount {
+                return Err(Error::InsufficientBalance);
+            }
+
+            self.balances.insert(caller, &(current_balance - amount));
+
+            self.env().emit_event(Withdrawn {
+                account: caller,
+                amount,
+            });
+            Ok(())
+        }
+
+        /// Get balance for an account
+        #[ink(message)]
+        pub fn get_balance(&self, account: AccountId) -> u128 {
+            self.balances.get(account).unwrap_or(0)
+        }
+
+        // ========================================================================
         // BETTING FUNCTIONS
         // ========================================================================
 
         /// Place an exacta bet (predict 1st and 2nd place in order)
-        #[ink(message, payable)]
-        pub fn place_exacta_bet(&mut self, first_pick: u8, second_pick: u8) -> Result<()> {
+        /// Deducts the bet amount from the caller's asset balance
+        #[ink(message)]
+        pub fn place_exacta_bet(&mut self, first_pick: u8, second_pick: u8, amount: u128) -> Result<()> {
             // Validate race status
             if self.status != RaceStatus::Betting {
                 return Err(Error::BettingClosed);
@@ -382,12 +448,18 @@ mod horse_race {
                 return Err(Error::SameHorsePicked);
             }
 
-            let caller = self.env().caller();
-            let amount = self.env().transferred_value();
-
             if amount == 0 {
                 return Err(Error::ZeroBetAmount);
             }
+
+            let caller = self.env().caller();
+            
+            // Check and deduct balance
+            let current_balance = self.balances.get(caller).unwrap_or(0);
+            if current_balance < amount {
+                return Err(Error::InsufficientBalance);
+            }
+            self.balances.insert(caller, &(current_balance - amount));
 
             // Create bet
             let bet = ExactaBet {
@@ -420,7 +492,7 @@ mod horse_race {
 
         /// Get total pot for current race
         #[ink(message)]
-        pub fn get_total_pot(&self) -> Balance {
+        pub fn get_total_pot(&self) -> u128 {
             self.total_pot
         }
 
@@ -552,7 +624,7 @@ mod horse_race {
         // PAYOUT ENGINE
         // ========================================================================
 
-        /// Calculate and distribute payouts
+        /// Calculate and distribute payouts - credits winning amounts to user balances
         #[ink(message)]
         pub fn distribute_payouts(&mut self) -> Result<Vec<Payout>> {
             if self.status != RaceStatus::Finished {
@@ -568,6 +640,10 @@ mod horse_race {
                 if bet.first_pick == winning_exacta.0 && bet.second_pick == winning_exacta.1 {
                     // Winner!
                     let payout_amount = bet.amount * multiplier as u128;
+                    
+                    // Credit the payout to the winner's balance
+                    let current_balance = self.balances.get(bet.bettor).unwrap_or(0);
+                    self.balances.insert(bet.bettor, &(current_balance + payout_amount));
                     
                     let payout = Payout {
                         bettor: bet.bettor,
