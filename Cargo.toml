@@ -6,6 +6,7 @@ edition = "2021"
 
 [dependencies]
 ink = { version = "5.1.1", default-features = false }
+sp-runtime = { version = "40.0.0", default-features = false }
 
 [dev-dependencies]
 ink_e2e = { version = "5.1.1" }
@@ -17,6 +18,7 @@ path = "lib.rs"
 default = ["std"]
 std = [
     "ink/std",
+    "sp-runtime/std",
 ]
 ink-as-dependency = []
 e2e-tests = []

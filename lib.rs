@@ -19,6 +19,9 @@
 use ink::prelude::vec::Vec;
 use ink::prelude::vec;
 
+/// pallet_assets runtime calls
+pub mod assets;
+
 /// Precision for fixed-point arithmetic (4 decimal places)
 const PRECISION: u64 = 10000;
 
@@ -34,6 +37,9 @@ const TOTAL_STRENGTH: u64 = 21;
 #[ink::contract]
 mod horse_race {
     use super::*;
+
+    // Asset transfer interfaces
+    use crate::assets::{AssetsCall, RuntimeCall};
 
     // ============================================================================
     // ERROR TYPES
